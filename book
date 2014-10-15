@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <string.h>
+typedef struct
+{
+  int weight,to,next;
+}edge;
+void keyway();  //关键路径
+void dfs(int v);  //深度优先搜索
+edge all[100000];
+int head[1000],n,e,t=0,topo[1000],color[1000],p;
+int main()
+{
+  int i;
+  printf("请输入有向图的顶点数和边数：\n");
+  scanf("%d%d",&n,&e);
+  p=n;
+  memset(head,-1,sizeof head); //申请空间
+  for(i=0;i<e;i++)
+  {
+    int head1,tail,weight;   //源点，汇点，权值
+    printf("第%d个顶点和第%d个顶点以及它们的权值\n",i,i+1);
+	scanf("%d%d%d",&tail,&head1,&weight);
+	all[t].weight=weight;          //初始化赋值
+	all[t].to=head1;
+	all[t].next=head[tail];
+	head[tail]=t++;
+  }
+  memset(color,0,sizeof color);
+  for(i=1;i<=n;i++)
+    if(!color[i])
+      dfs(i);
+  printf("result=\n");
+  keyway();
+  return 0;
+}
+void dfs(int v)   //深搜
+{
+  int i;
+  color[v]=1;
+  for(i=head[v];i!=-1;i=all[i].next)
+    if(!color[all[i].to])
+	  dfs(all[i].to);
+  topo[p--]=v;
+  return;
+}
+void keyway()
+{
+  int i,ve[1000],j,vl[1000];
+  memset(ve,0,sizeof ve);
+  for(i=1;i<=n;i++)
+    for(j=head[topo[i]];j!=-1;j=all[j].next)
+	  if(ve[all[j].to]<ve[topo[i]]+all[j].weight)
+	    ve[all[j].to]=ve[topo[i]]+all[j].weight;
+  for(i=1;i<=n;i++)
+    vl[i]=ve[n];
+  for(i=n;i>=1;i--)
+    for(j=head[topo[i]];j!=-1;j=all[j].next)
+	  if(vl[topo[i]]>vl[all[j].to]-all[j].weight)
+	    vl[topo[i]]=vl[all[j].to]-all[j].weight;
+  for(i=1;i<=n;i++)
+    for(j=head[i];j!=-1;j=all[j].next)
+	  if(ve[i]==vl[all[j].to]-all[j].weight)
+	    printf("%d %d %d\n",i,all[j].to,all[j].weight);
+  return;
+}
+/*9 11
+7 9 2
+8 9 4
+5 7 9
+5 8 7
+6 8 4
+4 6 2
+3 5 1
+2 5 1
+1 2 6
+1 3 4
+1 4 5
+ve:最早发生时间                最早开始
+vl:最迟发生时间                 最晚开始
+act:活动持续时间
+从起始点到结束点最大长度的路径。
+ve=vl-act
+*/
